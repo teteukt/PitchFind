@@ -1,4 +1,4 @@
-package br.com.teteukt.pitchfind
+package br.com.teteukt.pitchfind.domain
 
 import java.util.Random
 
@@ -38,6 +38,28 @@ enum class NoteKey(val nomenclature: String, val frequency: Float) {
                 val randomIndex: Int = Random().nextInt(size)
                 this[randomIndex]
             }
+        }
+
+        fun getOrderStartingFromNome(note: NoteKey, length: Int): List<NoteKey> {
+            val result = mutableListOf<NoteKey>()
+            var currentNote = note
+            result.add(currentNote)
+            for (i in 0 until length - 1) {
+                currentNote = currentNote.getNext()
+                result.add(currentNote)
+            }
+            return result
+        }
+
+        fun getRandomOrderedNoteSequence(length: Int): List<NoteKey> {
+            val result = mutableListOf<NoteKey>()
+            var currentNote = NoteKey.getRandomNote()
+            result.add(currentNote)
+            for (i in 0 until length - 1) {
+                currentNote = currentNote.getNext()
+                result.add(currentNote)
+            }
+            return result
         }
     }
 }

@@ -1,14 +1,13 @@
 package br.com.teteukt.pitchfind.service
 
 import android.content.Context
-import android.media.AudioManager
 import android.media.SoundPool
-import androidx.activity.ComponentActivity
 import br.com.teteukt.pitchfind.R
 
 class SoundPoolService(private val context: Context, private val soundPool: SoundPool) {
 
     private var pianoKeyA440SoundId: Int? = null
+    private val _playingSounds = mutableListOf<Int>()
 
     init {
         load()
@@ -19,14 +18,15 @@ class SoundPoolService(private val context: Context, private val soundPool: Soun
     }
 
     fun play(pitch: Float) {
-        val audioManager = context.getSystemService(ComponentActivity.AUDIO_SERVICE) as AudioManager
-        val actVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
-        val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
-        val volume: Float = (actVolume / maxVolume).toFloat()
-
         pianoKeyA440SoundId?.let { pianoKeyA440SoundId ->
-            soundPool.play(pianoKeyA440SoundId, volume, volume, 1, 0, pitch)
+            _playingSounds.add(soundPool.play(pianoKeyA440SoundId, 1F, 1F, 1, 0, pitch))
         }
+    }
 
+    fun stopAll() {
+        _playingSounds.forEach {
+            soundPool.stop(it)
+        }
+        _playingSounds.clear()
     }
 }

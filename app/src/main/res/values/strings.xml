@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">PitchFind</string>
+    <string name="finish_label_result_skipped">Você pulou.</string>
+    <string name="finish_label_result_correct">Você acertou!</string>
+    <string name="finish_label_result_missed">Você errou.</string>
+    <string name="finish_earn_points_label">Ganhou %d pontos</string>
+    <string name="finish_lost_points_label">Perdeu %d pontos</string>
 </resources>
