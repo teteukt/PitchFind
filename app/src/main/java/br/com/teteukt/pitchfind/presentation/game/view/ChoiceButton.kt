@@ -27,10 +27,13 @@ import br.com.teteukt.pitchfind.domain.NoteKey
 import br.com.teteukt.pitchfind.presentation.theme.DarkTan
 import br.com.teteukt.pitchfind.presentation.theme.Flavescent
 import br.com.teteukt.pitchfind.presentation.theme.GraniteGray
+import br.com.teteukt.pitchfind.presentation.theme.Gray
 
 @Composable
-fun ChoiceButton(noteKey: NoteKey, onClick: () -> Unit) {
+fun ChoiceButton(noteKey: NoteKey, disabled: Boolean = false, onClick: () -> Unit) {
+    val enabled = disabled.not()
     ElevatedButton(
+        enabled = enabled,
         modifier = Modifier
             .fillMaxWidth()
             .height(64.dp),
@@ -46,7 +49,10 @@ fun ChoiceButton(noteKey: NoteKey, onClick: () -> Unit) {
                 .fillMaxSize()
                 .background(
                     brush = Brush.linearGradient(
-                        colors = listOf(Flavescent, DarkTan),
+                        colors = listOf(
+                            if (enabled) Flavescent else Gray,
+                            if (enabled) DarkTan else Gray
+                        ),
                         start = Offset.Zero,
                         end = Offset.Infinite,
                     )
@@ -55,7 +61,7 @@ fun ChoiceButton(noteKey: NoteKey, onClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = noteKey.nomenclature,
+                text = noteKey.sharpNomenclature,
                 color = GraniteGray,
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
@@ -67,6 +73,12 @@ fun ChoiceButton(noteKey: NoteKey, onClick: () -> Unit) {
 
 @Composable
 @Preview
-private fun ChoiceButtonPreview() {
+private fun EnabledChoiceButtonPreview() {
     ChoiceButton(NoteKey.A) {}
+}
+
+@Composable
+@Preview
+private fun DisabledChoiceButtonPreview() {
+    ChoiceButton(NoteKey.A, disabled = true) {}
 }

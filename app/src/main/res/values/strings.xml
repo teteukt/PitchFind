@@ -5,4 +5,19 @@
     <string name="finish_label_result_missed">Você errou.</string>
     <string name="finish_earn_points_label">Ganhou %d pontos</string>
     <string name="finish_lost_points_label">Perdeu %d pontos</string>
+
+    <string name="mode_single_note">Nota única</string>
+    <string name="mode_single_note_description">Você terá que descobrir uma única nota, sem referência de outras notas</string>
+
+    <string name="mode_four_sequential">Sequencial de 4</string>
+    <string name="mode_four_sequential_description">Escala cromática de 4 notas a partir de uma nota aleatória</string>
+
+    <string name="mode_five_sequential">Sequencial de 5</string>
+    <string name="mode_five_sequential_description">Escala cromática de 5 notas a partir de uma nota aleatória</string>
+
+    <string name="mode_four_shuffled">Aleatório de 4</string>
+    <string name="mode_four_shuffled_description">Sequência aleatória de 4 notas</string>
+
+    <string name="mode_five_shuffled">Aleatório de 5</string>
+    <string name="mode_five_shuffled_description">Sequência aleatória de 5 notas</string>
 </resources>

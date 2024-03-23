@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.LaunchedEffect
+import br.com.teteukt.pitchfind.domain.ChallengeMode
 import br.com.teteukt.pitchfind.domain.NoteSequenceGeneratorStrategy
 import br.com.teteukt.pitchfind.presentation.finished.FinishedActivity
 import br.com.teteukt.pitchfind.presentation.game.view.GameActivityView
@@ -17,10 +18,29 @@ class GameActivity : ComponentActivity() {
 
     private val viewModel: GameViewModel by viewModel()
 
+    private fun getModeExtra() = intent.extras?.getString("EXTRA_MODE")
+
+    private fun getMode(): ChallengeMode {
+        return ChallengeMode.entries.find { result -> result.name == getModeExtra() }
+            ?: throw IllegalArgumentException("invalid mode extra")
+    }
+
+    private fun getModeNoteSequencerStrategy(): NoteSequenceGeneratorStrategy {
+        return when (getMode()) {
+            ChallengeMode.SINGLE_NOTE -> NoteSequenceGeneratorStrategy.SingleNote
+            ChallengeMode.SEQUENTIAL_4 -> NoteSequenceGeneratorStrategy.MultipleSequentialNotes(4)
+            ChallengeMode.SEQUENTIAL_5 -> NoteSequenceGeneratorStrategy.MultipleSequentialNotes(5)
+            ChallengeMode.SHUFFLED_4 -> NoteSequenceGeneratorStrategy.MultipleShuffledNotes(4)
+            ChallengeMode.SHUFFLED_5 -> NoteSequenceGeneratorStrategy.MultipleShuffledNotes(5)
+        }
+    }
+
     private fun startFinishedActivity(resultEvent: GameViewModel.ResultEvent) {
         finish()
         val finishedIntent = Intent(this, FinishedActivity::class.java).run {
+            putExtra("EXTRA_MODE", getModeExtra())
             putExtra("extra_finished_result", resultEvent.finishResult.extra)
+            putExtra("EXTRA_SCORE", viewModel.getScore())
         }
 
         val startIntent = Intent(this, StartActivity::class.java)
@@ -46,7 +66,7 @@ class GameActivity : ComponentActivity() {
         setContent {
 
             LaunchedEffect(key1 = "init") {
-                viewModel.generateAndPlaySequence(NoteSequenceGeneratorStrategy.MultipleSequentialNotes(4))
+                viewModel.generateAndPlaySequence(getModeNoteSequencerStrategy())
                 viewModel.resultEvent.observe(this@GameActivity) {
                     if (it != null) startFinishedActivity(it)
                 }
@@ -57,7 +77,9 @@ class GameActivity : ComponentActivity() {
                 replayCount = viewModel.replayCount.value,
                 enabledReplay = viewModel.canReplay.value,
                 choices = viewModel.choices.value,
+                showNotesAsFlat = viewModel.showNotesAsFlat.value,
                 step = viewModel.currentPlayingNoteIndex.value,
+                showReplayAndChoices = viewModel.showReplayAndChoices.value,
                 onClickSkip = {
                     viewModel.skip()
                 },

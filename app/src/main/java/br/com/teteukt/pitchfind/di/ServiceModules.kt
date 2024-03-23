@@ -4,6 +4,7 @@ import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.media.SoundPool
 import br.com.teteukt.pitchfind.R
+import br.com.teteukt.pitchfind.service.ScoreService
 import br.com.teteukt.pitchfind.service.SoundPoolService
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
@@ -19,4 +20,5 @@ val serviceModules = module {
             .build()
     }
     single { SoundPoolService(androidContext(), get()) }
+    factory { ScoreService() }
 }

@@ -17,24 +17,27 @@ import br.com.teteukt.pitchfind.presentation.theme.GraniteGray
 import br.com.teteukt.pitchfind.presentation.theme.Gray
 
 @Composable
-fun NoteRow(notes: List<NoteKey>, step: Int = 0) {
+fun NoteRow(notes: List<NoteKey>, showNotesAsFlat: Boolean, step: Int = 0) {
     LazyRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
         itemsIndexed(notes) { index, note ->
-            val isCurrentStep = index == step
-            val isLast = step == notes.size - 1
+
+            fun isCurrentStep() = index == step
+            fun isLast() = step == notes.size - 1
+
             if (index == notes.size - 1) {
-                NoteCharacter(text = "?", isLast || isCurrentStep)
+                NoteCharacter(note = null, showNotesAsFlat, isLast() || isCurrentStep())
             } else {
-                NoteCharacter(text = note.nomenclature, bold = isCurrentStep)
+                NoteCharacter(note = note, showNotesAsFlat, bold = isCurrentStep())
             }
         }
     }
 }
 
 @Composable
-fun NoteCharacter(text: String, bold: Boolean = false) {
+fun NoteCharacter(note: NoteKey?, showAsFlat: Boolean, bold: Boolean = false) {
+
     Text(
-        text = text,
+        text = note?.let { if(showAsFlat) it.flatNomenclature else it.sharpNomenclature } ?: "?",
         modifier = Modifier.padding(horizontal = 2.dp),
         fontSize = 48.sp,
         color = if (bold) GraniteGray else Gray,
@@ -45,5 +48,11 @@ fun NoteCharacter(text: String, bold: Boolean = false) {
 @Composable
 @Preview(showBackground = true)
 private fun NoteRowPreview(notes: List<String>) {
-    NoteRow(listOf(NoteKey.C, NoteKey.D, NoteKey.E, NoteKey.F), 4)
+    NoteRow(listOf(NoteKey.C, NoteKey.D, NoteKey.E, NoteKey.F), false, 4)
+}
+
+@Composable
+@Preview(showBackground = true)
+private fun FlatNoteRowPreview(notes: List<String>) {
+    NoteRow(listOf(NoteKey.C_SHARP, NoteKey.D_SHARP, NoteKey.E, NoteKey.F_SHARP), true, 4)
 }

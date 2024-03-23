@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,12 +22,14 @@ fun GameActivityView(
     replayCount: Int,
     enabledReplay: Boolean,
     choices: List<NoteKey>,
+    showNotesAsFlat: Boolean,
     step: Int,
+    showReplayAndChoices: Boolean,
     onClickReplay: () -> Unit,
     onClickChoice: (NoteKey) -> Unit,
     onClickSkip: () -> Unit,
 ) {
-    PitchFindTheme {
+    PitchFindTheme(statusBarColor = MaterialTheme.colorScheme.surface) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -34,18 +37,20 @@ fun GameActivityView(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            NoteRow(notes, step)
-            ReplayButton(count = replayCount, enabled = enabledReplay) { onClickReplay() }
-            Spacer(modifier = Modifier.padding(32.dp))
-            Text(
-                text = "Qual a nota escondida?",
-                modifier = Modifier.padding(vertical = 16.dp),
-                color = GraniteGray
-            )
-            ChoiceButtonColumn(
-                choices = choices,
-                onClickChoice = { onClickChoice(it) },
-                onClickSkip = { onClickSkip() })
+            NoteRow(notes, showNotesAsFlat, step)
+            if (showReplayAndChoices) {
+                ReplayButton(count = replayCount, enabled = enabledReplay) { onClickReplay() }
+                Spacer(modifier = Modifier.padding(32.dp))
+                Text(
+                    text = "Qual a nota escondida?",
+                    modifier = Modifier.padding(vertical = 16.dp),
+                    color = GraniteGray
+                )
+                ChoiceButtonColumn(
+                    choices = choices,
+                    onClickChoice = { onClickChoice(it) },
+                    onClickSkip = { onClickSkip() })
+            }
         }
     }
 }
@@ -57,7 +62,9 @@ private fun GameActivityViewPreview() {
         notes = listOf(NoteKey.C, NoteKey.D, NoteKey.E, NoteKey.F),
         replayCount = 2,
         choices = listOf(NoteKey.C, NoteKey.D, NoteKey.E, NoteKey.F),
+        showNotesAsFlat = false,
         enabledReplay = true,
+        showReplayAndChoices = true,
         step = 0,
         onClickReplay = {},
         onClickChoice = {},

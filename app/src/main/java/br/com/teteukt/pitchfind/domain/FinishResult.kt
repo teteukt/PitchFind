@@ -13,8 +13,8 @@ enum class FinishResult(
     val color: Color,
     @DrawableRes val icon: Int,
     @StringRes val label: Int,
-    val pointChangeAmount: Int,
-    @StringRes val pointChange: Int
+    val scoreChangeAmount: Int,
+    @StringRes val scoreChangeLabel: Int
 ) {
     SKIPPED(
         "result_skipped",
@@ -37,7 +37,7 @@ enum class FinishResult(
         FireOpal,
         R.drawable.close,
         R.string.finish_label_result_missed,
-        400,
+        -400,
         R.string.finish_lost_points_label
     )
 }

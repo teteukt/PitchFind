@@ -10,22 +10,23 @@ import androidx.lifecycle.viewModelScope
 import br.com.teteukt.pitchfind.domain.FinishResult
 import br.com.teteukt.pitchfind.domain.NoteKey
 import br.com.teteukt.pitchfind.domain.NoteSequenceGeneratorStrategy
+import br.com.teteukt.pitchfind.service.ScoreService
 import br.com.teteukt.pitchfind.service.SoundPoolService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onCompletion
+import java.util.Random
 
-class GameViewModel(private val soundPoolService: SoundPoolService) : ViewModel() {
+class GameViewModel(
+    private val soundPoolService: SoundPoolService,
+    private val scoreService: ScoreService
+) : ViewModel() {
 
     private val _noteSequence = mutableStateOf(listOf<NoteKey>())
     val noteSequence: State<List<NoteKey>> = _noteSequence
 
     private val _choices = mutableStateOf(listOf<NoteKey>())
     val choices: State<List<NoteKey>> = _choices
-
-    private val _currentPlayingState = MutableLiveData<PlayingState>(PlayingState.Idle)
-    val currentPlayingState: LiveData<PlayingState> = _currentPlayingState
 
     private val _resultEvent = MutableLiveData<ResultEvent?>(null)
     val resultEvent: LiveData<ResultEvent?> = _resultEvent
@@ -39,28 +40,43 @@ class GameViewModel(private val soundPoolService: SoundPoolService) : ViewModel(
     private val _canReplay = mutableStateOf(false)
     val canReplay: State<Boolean> = _canReplay
 
+    private val _showReplayAndChoices = mutableStateOf(false)
+    val showReplayAndChoices: State<Boolean> = _showReplayAndChoices
+
     private val _currentPlayingNoteIndex = mutableIntStateOf(0)
     val currentPlayingNoteIndex: State<Int> = _currentPlayingNoteIndex
+
+    private val _showNotesAsFlat = mutableStateOf(false)
+    val showNotesAsFlat: State<Boolean> = _showNotesAsFlat
 
     fun stopSounds() {
         soundPoolService.stopAll()
     }
 
+    fun getScore() = scoreService.score
+
     fun tryChoice(noteKey: NoteKey) {
         if (noteKey == _correctNoteKey.value) {
-            _resultEvent.value = ResultEvent.CorrectAnswer
+            val event = ResultEvent.CorrectAnswer
+            _resultEvent.value = event
+            scoreService.increase(event.finishResult.scoreChangeAmount)
         } else {
-            _resultEvent.value = ResultEvent.MissedAnswer
+            val event = ResultEvent.MissedAnswer
+            _resultEvent.value = event
+            scoreService.decrease(event.finishResult.scoreChangeAmount)
         }
     }
 
     fun skip() {
-        _resultEvent.value = ResultEvent.Skipped
+        val event = ResultEvent.Skipped
+        _resultEvent.value = event
+        scoreService.decrease(event.finishResult.scoreChangeAmount)
     }
 
     fun generateAndPlaySequence(strategy: NoteSequenceGeneratorStrategy) {
         generateNoteSequence(strategy)
         playSequence(1000)
+        _showNotesAsFlat.value = Random().nextBoolean()
     }
 
     fun replaySequence() {
@@ -72,23 +88,21 @@ class GameViewModel(private val soundPoolService: SoundPoolService) : ViewModel(
         delay: Long,
     ) {
         _canReplay.value = false
-        _currentPlayingState.value = PlayingState.Started
+        _showReplayAndChoices.value = false
         flow {
             var i = 0;
+            _currentPlayingNoteIndex.intValue = -1
             delay(delay)
             while (i < _noteSequence.value.size) {
                 val currentNote = _noteSequence.value[i]
                 playNote(currentNote)
-                _currentPlayingState.postValue(PlayingState.Playing)
                 _currentPlayingNoteIndex.intValue = i
                 i++
                 delay(delay)
             }
             emit(Unit)
-        }.onCompletion {
             _canReplay.value = true
-            _currentPlayingState.postValue(PlayingState.Ended)
-            _currentPlayingState.postValue(PlayingState.Idle)
+            _showReplayAndChoices.value = true
         }.launchIn(viewModelScope)
     }
 
@@ -101,13 +115,6 @@ class GameViewModel(private val soundPoolService: SoundPoolService) : ViewModel(
         _choices.value = strategyResult.choices
         _noteSequence.value = strategyResult.noteSequence
         _correctNoteKey.value = strategyResult.correctNote
-    }
-
-    sealed class PlayingState {
-        data object Idle : PlayingState()
-        data object Started : PlayingState()
-        data object Playing : PlayingState()
-        data object Ended : PlayingState()
     }
 
     sealed class ResultEvent(val finishResult: FinishResult) {
